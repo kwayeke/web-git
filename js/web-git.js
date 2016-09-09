@@ -4,9 +4,6 @@
 function webGit(database) {
 
     this.database = database;
-    this.changeName = function (name) {
-        this.lastName = name;
-    };
 
     // URL PARSER
     //https://www.abeautifulsite.net/parsing-urls-in-javascript
