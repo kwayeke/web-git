@@ -5,8 +5,13 @@ function webGit(database) {
 
     this.database = database;
 
+    // Timestamp setter, seconds
+    this.now = function() {
+        return Math.floor(Date.now() / 1000)
+    }
+
     // URL PARSER
-    //https://www.abeautifulsite.net/parsing-urls-in-javascript
+    // https://www.abeautifulsite.net/parsing-urls-in-javascript
     this.parseURL = function (url) {
         var parser = document.createElement('a'),
             params = {},
@@ -36,3 +41,20 @@ function webGit(database) {
         };
     }
 }
+
+/* To set and get different data objects
+var o = {
+  a: 7,
+  get b() { 
+    return this.a + 1;
+  },
+  set c(x) {
+    this.a = x / 2
+  }
+};
+
+console.log(o.a); // 7
+console.log(o.b); // 8
+o.c = 50;
+console.log(o.a); // 25
+*/
