@@ -1,13 +1,12 @@
 // Web-git is a wrapper for Dexie.js --> indexedDB to implement
 // a JavaScript-based REST API that stores data client side.
 
-// 1. figure out how to REALLY parse url params
-// 2. come up with a formal spec for params to talk to dexie functions
-// 3. create html/web view to use CRUD hooks to update user on status of that
-// 4. figure out version control
-// 5. add interactive elements to upload data in different ways, export data, plot data, etc.
-// 6. add interactive elements to view databases, select / change active database, delete database
-// 7. how can we add version control? can we integrate github?
+// 1. come up with a formal spec for params to talk to dexie functions
+// 2. create html/web view to use CRUD hooks to update user on status of that
+// 3. figure out version control
+// 4. add interactive elements to upload data in different ways, export data, plot data, etc.
+// 5. add interactive elements to view databases, select / change active database, delete database
+// 6. how can we add version control? can we integrate github?
 
 function webGit(url) {
 
