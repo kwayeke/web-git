@@ -1,9 +1,18 @@
 // Web-git is a wrapper for Dexie.js --> indexedDB to implement
 // a JavaScript-based REST API that stores data client side.
 
-function webGit(database) {
+// 1. figure out how to REALLY parse url params
+// 2. come up with a formal spec for params to talk to dexie functions
+// 3. create html/web view to use CRUD hooks to update user on status of that
+// 4. figure out version control
+// 5. add interactive elements to upload data in different ways, export data, plot data, etc.
+// 6. add interactive elements to view databases, select / change active database, delete database
+// 7. how can we add version control? can we integrate github?
 
-    this.database = database;
+function webGit(url) {
+
+    // webGit init should take the url... if not defined, used document.URL
+    this.url = url || document.URL
 
     // Timestamp setter, seconds
     this.now = function() {
@@ -20,26 +29,26 @@ function webGit(database) {
         // Let the browser do the work
         parser.href = url;
 
-        // Convert query string to object
         queries = parser.search.replace(/^\?/, '').split('&');
         for (i = 0; i < queries.length; i++ ) {
             split = queries[i].split('=');
             params[split[0]] = split[1];
         }
 
-        return {
-
-            protocol: parser.protocol,
-            host: parser.host,
-            hostname: parser.hostname,
-            port: parser.port,
-            pathname: parser.pathname,
-            search: parser.search,
-            params: params,
-            hash: parser.hash
-
-        };
+       return {
+                protocol: parser.protocol,
+                host: parser.host,
+                hostname: parser.hostname,
+                port: parser.port,
+                pathname: parser.pathname,
+                search: parser.search,
+                params: params,
+                hash: parser.hash
+           };
     }
+
+    // Parse the url
+    this.parsed = this.parseURL(this.url);
 }
 
 /* To set and get different data objects
