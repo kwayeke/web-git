@@ -35,11 +35,10 @@ function webGit(url,specfile) {
         this.load_url(url).then(function(spec){
             console.log("COMMAND SPEC LOADED:")
             console.log(spec);
+            this.spec = spec;
         });
 
     }
-
-
 
     // FILE OPERATIONS ///////////////////////////////////////////
 
@@ -107,7 +106,7 @@ function webGit(url,specfile) {
 
     // Parse the url, load the spec
     this.parsed = this.parseURL(this.url);
-    this.spec = this.load_spec();
+    this.load_spec();
 
 }
 
