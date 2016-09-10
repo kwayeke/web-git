@@ -1,0 +1,11 @@
+{
+   "database":{
+      "description":"the name of the database to create or connect to."
+   },
+   "version":{
+      "description":"the version of the database to use."
+   },
+   "command":{
+      "description":"the command to issue to the database."
+   }
+}

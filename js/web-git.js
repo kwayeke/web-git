@@ -18,6 +18,46 @@ function webGit(url) {
         return Math.floor(Date.now() / 1000)
     }
 
+    // Load the spec (commands) into the object
+    this.load_spec = function(url) {
+
+        var url = url || "spec.json"
+        this.load_url(url).then(function(spec){
+            console.log("COMMAND SPEC LOADED:")
+            console.log(spec);
+        });
+
+    }
+
+    // Serial Xhr request, if web worker not available
+    function get_json(url) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", url, false);  // synchronous request
+        xhr.send(null);
+        return JSON.parse(xhr.responseText);
+    }
+
+    // load an external json (url)
+    this.load_url = function (url) {
+
+        return new Promise((resolve, reject) => {
+            if (typeof(Worker) !== "undefined") {
+                const worker = new Worker("js/worker.js");
+                worker.onerror = (e) => {
+                    worker.terminate();
+                    reject(e);
+                };
+                worker.onmessage = (e) => {
+                    worker.terminate();
+                    resolve(e.data);
+                }
+                worker.postMessage({url:url,command:"getData"});
+            } else {
+                resolve(get_json(url));
+            }
+        });
+    };
+
     // URL PARSER
     // https://www.abeautifulsite.net/parsing-urls-in-javascript
     this.parseURL = function (url) {
@@ -46,8 +86,10 @@ function webGit(url) {
            };
     }
 
-    // Parse the url
+    // Parse the url, load the spec
     this.parsed = this.parseURL(this.url);
+    this.spec = this.load_spec();
+
 }
 
 /* To set and get different data objects
@@ -66,3 +108,5 @@ console.log(o.b); // 8
 o.c = 50;
 console.log(o.a); // 25
 */
+
+
