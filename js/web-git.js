@@ -1,6 +1,12 @@
 // Web-git is a wrapper for Dexie.js --> indexedDB to implement
 // a JavaScript-based REST API that stores data client side.
 
+/* OPTIONAL PARAMETERS
+[1] url: the url to parse to interact with the database. If not provided, the page url will be used (default)
+[2] specfile: the specification json file for allowable commands. If not provided, js/spec.json is used (default)
+*/
+
+// 
 // 1. come up with a formal spec for params to talk to dexie functions
 // 2. create html/web view to use CRUD hooks to update user on status of that
 // 3. figure out version control
@@ -8,26 +14,34 @@
 // 5. add interactive elements to view databases, select / change active database, delete database
 // 6. how can we add version control? can we integrate github?
 
-function webGit(url) {
+function webGit(url,specfile) {
 
     // webGit init should take the url... if not defined, used document.URL
     this.url = url || document.URL
+    this.specfile = specfile || "spec.json"
 
     // Timestamp setter, seconds
     this.now = function() {
         return Math.floor(Date.now() / 1000)
     }
 
+
+    // COMMAND SPEC FUNCTIONS ////////////////////////////////////
+
     // Load the spec (commands) into the object
     this.load_spec = function(url) {
 
-        var url = url || "spec.json"
+        var url = url || this.specfile
         this.load_url(url).then(function(spec){
             console.log("COMMAND SPEC LOADED:")
             console.log(spec);
         });
 
     }
+
+
+
+    // FILE OPERATIONS ///////////////////////////////////////////
 
     // Serial Xhr request, if web worker not available
     function get_json(url) {
@@ -58,8 +72,10 @@ function webGit(url) {
         });
     };
 
+
+    // INPUT COMMAND PARSING /////////////////////////////////////
+
     // URL PARSER
-    // https://www.abeautifulsite.net/parsing-urls-in-javascript
     this.parseURL = function (url) {
         var parser = document.createElement('a'),
             params = {},
@@ -85,6 +101,9 @@ function webGit(url) {
                 hash: parser.hash
            };
     }
+
+
+    // STARTUP COMMANDS //////////////////////////////////////////
 
     // Parse the url, load the spec
     this.parsed = this.parseURL(this.url);
