@@ -31,13 +31,9 @@ function webGit(url,specfile) {
     // Load the spec (commands) into the object
     this.load_spec = function(url) {
 
-        // STOPPED HERE - running into issue need to access "this" inside of promise,
-        // but can't...
-
-        // https://pouchdb.com/2015/05/18/we-have-a-problem-with-promises.html
         var url = url || this.specfile
         var holder = this;
-        this.load_url(url).then(function(spec){
+        return this.load_url(url).then(function(spec){
             console.log("COMMAND SPEC LOADED:")
             // the variable holder references our web-git object in memory
             holder.spec = spec;
@@ -53,9 +49,10 @@ function webGit(url,specfile) {
                 }
             }
             console.log("DATABASE PARAMS LOADED:")
-            holder.database = database;
             console.log(database);
-        });
+            holder.params = database;
+            return Promise.resolve()
+        })
         
     }
 
@@ -122,20 +119,20 @@ function webGit(url,specfile) {
 
 
     // DATABASE OPERATIONS ///////////////////////////////////////
-    this.create = function(database) {
-
-        this.database = database || this.database;
-
-        var db = new Dexie("friend_database");
-            db.version(1).stores({
-            friends: 'name,shoeSize'
-        });
+    this.create = function(params) {
+        this.params = params || this.params;
+        console.log("Creating database " + this.params.database);
+        this.db = new Dexie(this.params.database);
+        return Promise.resolve();
     };
     
     // STARTUP COMMANDS //////////////////////////////////////////
 
-    // Parse the url, load the spec
+    // Parse the url, load the spec, create the database
+    wb = this;
     this.parsed = this.parseURL(this.url);
-    this.database = this.load_spec();
+    this.load_spec().then(function(){ 
+        wb.create();
+    });
 
 }
