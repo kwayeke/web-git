@@ -1,11 +1,14 @@
 {
    "database":{
-      "description":"the name of the database to create or connect to."
+      "description":"the name of the database to create or connect to.",
+      "default":"default"
    },
    "version":{
-      "description":"the version of the database to use."
+      "description":"the version of the database to use.",
+      "default":1
    },
    "command":{
       "description":"the command to issue to the database."
    }
+
 }

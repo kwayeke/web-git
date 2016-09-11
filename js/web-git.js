@@ -17,8 +17,8 @@
 function webGit(url,specfile) {
 
     // webGit init should take the url... if not defined, used document.URL
-    this.url = url || document.URL
-    this.specfile = specfile || "spec.json"
+    this.url = url || document.URL;
+    this.specfile = specfile || "spec.json";
 
     // Timestamp setter, seconds
     this.now = function() {
@@ -31,13 +31,32 @@ function webGit(url,specfile) {
     // Load the spec (commands) into the object
     this.load_spec = function(url) {
 
+        // STOPPED HERE - running into issue need to access "this" inside of promise,
+        // but can't...
+
+        // https://pouchdb.com/2015/05/18/we-have-a-problem-with-promises.html
         var url = url || this.specfile
+        var holder = this;
         this.load_url(url).then(function(spec){
             console.log("COMMAND SPEC LOADED:")
+            // the variable holder references our web-git object in memory
+            holder.spec = spec;
             console.log(spec);
-            this.spec = spec;
-        });
 
+            // Set each of the defaults
+            var database = {};
+            for (var key in holder.spec) {
+                if (holder.spec.hasOwnProperty(key)) {
+                    if (holder.spec[key].hasOwnProperty('default')) {
+                        database[key] = holder.spec[key]['default'];
+                   }
+                }
+            }
+            console.log("DATABASE PARAMS LOADED:")
+            holder.database = database;
+            console.log(database);
+        });
+        
     }
 
     // FILE OPERATIONS ///////////////////////////////////////////
@@ -102,10 +121,21 @@ function webGit(url,specfile) {
     }
 
 
+    // DATABASE OPERATIONS ///////////////////////////////////////
+    this.create = function(database) {
+
+        this.database = database || this.database;
+
+        var db = new Dexie("friend_database");
+            db.version(1).stores({
+            friends: 'name,shoeSize'
+        });
+    };
+    
     // STARTUP COMMANDS //////////////////////////////////////////
 
     // Parse the url, load the spec
     this.parsed = this.parseURL(this.url);
-    this.load_spec();
+    this.database = this.load_spec();
 
 }
