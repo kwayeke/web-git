@@ -91,12 +91,16 @@ A database "store" is another name for a table. The default stores (tables) are 
 
 This was my simple solution to parsing table and field names from a URL - if you have suggestions for an improvement please contribute! Thus, to specify tables (stores) it would look something like this:
 
-      http://vsoch.github.io/web-git?stores=sandwiches|bread,filling,spread||cookies|base,flavor,mixins
+      http://vsoch.github.io/web-git?stores=sandwiches|bread,filling,spread||cookies|size,flavor,mixins
 
 
 ## add
-**in progress**
-A database "store" is another name for a table. The default stores (tables) are determined from schema.json, but you can also set this information via the URL. The basic format looks like `table|field1:value1,field2:value2,field3:value2` where `table` is the name of the table, and each field:value pair is separated by a comma. If a field is not found
+TODO: make sure that when we add something, when we refresh (and specify same db without stores) we can retrieve the same data. We also don't want the data overwritten if the spec is reloaded when we refresh the page...
+
+You can add entries (think of them as rows) to a specific table in your database similarly to how you would specify stores. The basic format looks like `table|field1:value1,field2:value2,field3:value2` where `table` is the name of the table, and each field:value pair is separated by a comma. If a table or field is not found in the database, it won't be added. So for example, to add an entry to our cookies table:
+
+      http://vsoch.github.io/web-git?add=cookies|size:small,flavor:chocolate,mixins:vanilla
+
 
 ["add","delete","update","drop","stores"]
 
