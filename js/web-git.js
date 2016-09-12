@@ -69,7 +69,7 @@ function webGit(url,specfile,schemafile) {
             console.log(schema);
 
             // Set each of the defaults
-            return Promise.resolve()
+            return Promise.resolve();
         })
     }
 
@@ -86,6 +86,7 @@ function webGit(url,specfile,schemafile) {
 
         // Update the schema
         this.db.version(this.params.version).stores(tables);
+        return Promise.resolve();
     }
 
     // FILE OPERATIONS ///////////////////////////////////////////
@@ -197,10 +198,18 @@ function webGit(url,specfile,schemafile) {
     this.load_spec().then(function(){ 
         wb.create().then(function() {
             wb.load_schema().then(function(){
+                // TODO: the following commands should be determined based on
+                // what is specified in URL - shouldn't update every time.
                 wb.print(wb.db).catch(function(e){
                     console.log("Creating initial database schema...");
                     // If database not found, create it
-                    wb.update_schema();
+                    wb.update_schema(wb.schema).then(function(){
+                        console.log("USER PROVIDED COMMANDS:")
+                        console.log(wb.parsed.params)
+                    });
+                }).then(function(){
+                    console.log("USER PROVIDED COMMANDS:")
+                    console.log(wb.parsed.params)
                 })
             })
         })
