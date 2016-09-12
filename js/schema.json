@@ -1,0 +1,6 @@
+{
+   "tables":[{
+      "name":"friends",
+      "fields": "name,shoeSize"
+   }]
+}
