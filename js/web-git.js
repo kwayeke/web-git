@@ -121,33 +121,59 @@ function webGit(url,specfile,schemafile) {
     };
 
 
-    // INPUT COMMAND PARSING /////////////////////////////////////
+     // INPUT COMMAND PARSING /////////////////////////////////////
 
-    // URL PARSER
-    this.parseURL = function (url) {
+     // URL PARSER
+     this.parseURL = function (url) {
         var parser = document.createElement('a'),
             params = {},
             queries, split, i;
 
-        // Let the browser do the work
-        parser.href = url;
+        wb = this;
+        return new Promise(function(resolve,reject){
 
-        queries = parser.search.replace(/^\?/, '').split('&');
-        for (i = 0; i < queries.length; i++ ) {
-            split = queries[i].split('=');
-            params[split[0]] = split[1].replace('/',''); // removes trailing slashes
-        }
+            // Let the browser do the work
+            parser.href = url;
 
-       return {
-                protocol: parser.protocol,
-                host: parser.host,
-                hostname: parser.hostname,
-                port: parser.port,
-                pathname: parser.pathname,
-                search: parser.search,
-                params: params,
-                hash: parser.hash
-           };
+            queries = parser.search.replace(/^\?/, '').split('&');
+            for (i = 0; i < queries.length; i++ ) {
+                split = queries[i].split('=');
+
+                // If the parameter isn't given with an arg (eg, drop)
+                if (split.length == 0) {
+                    params[split[0]] = "";
+                } else {
+                    params[split[0]] = split[1].replace('/',''); // removes trailing slashes
+                }
+
+                // If the user specifies the database, set it
+                if (split[0] == "database"){
+                    console.log("Found database params...");
+                    wb.params.database = split[1].replace('/','');
+                }
+ 
+                // If the user specifies the version, set it
+                if (split[0] == "version"){
+                    console.log("Found version params...");
+                    wb.params.version = split[1].replace('/','');
+                }
+
+            }
+
+            wb.parsed = {
+                            protocol: parser.protocol,
+                            host: parser.host,
+                            hostname: parser.hostname,
+                            port: parser.port,
+                            pathname: parser.pathname,
+                            search: parser.search,
+                            params: params,
+                            hash: parser.hash
+                        };
+
+            resolve();
+
+        })
     }
 
 
@@ -165,7 +191,8 @@ function webGit(url,specfile,schemafile) {
         this.db.delete().then(function(){
             return Promise.resolve();
         }).catch(function(e){
-            return Promise.reject(e);
+           console.log(e); 
+           //return Promise.reject(e);
         })
     };
 
@@ -175,13 +202,22 @@ function webGit(url,specfile,schemafile) {
         var commands = this.parsed.params;
         console.log(commands);
 
+        // Commands will go in as an array of promises
+        // need to think about: if user should be adding one at a time? probably...
+        var promises = [];
+
         // For each command, if it's in allowable commands, run it
         for (command in commands) {
             if (commands.hasOwnProperty(command)){
                 if (this.params.command.indexOf(command) > -1){
                     var param = commands[command];
+
                     // TODO: If valid command, take appropriate action here
                     console.log(command + ": " + param);
+                    if (command=="drop"){
+                        console.log('DROPPING DATABASE.');
+                        wb.delete();
+                    }
 
                 }
             }
@@ -212,23 +248,25 @@ function webGit(url,specfile,schemafile) {
 
     // Parse the url, load the spec, create the database
     wb = this;
-    this.parsed = this.parseURL(this.url);
-    this.load_spec().then(function(){ 
-        wb.create().then(function() {
-            wb.load_schema().then(function(){
-                // Try opening, if there is error, update the schema
-                wb.db.open().catch(function(e){
-                    console.log("Creating initial database schema...");
-                    // If database not found, create it
-                    wb.update_schema(wb.schema).then(function(){
+    // TODO: make the parseURL into a function, and it needs to run AFTER
+    // load_spec so parameters parsed from URL override the ones that are default in spec.
+    this.load_spec().then(function(){
+        wb.parseURL(wb.url).then(function(){ 
+            wb.create().then(function() {
+                wb.load_schema().then(function(){
+                    // Try opening, if there is error, update the schema
+                    wb.db.open().catch(function(e){
+                        console.log("Creating initial database schema...");
+                        // If database not found, create it
+                        wb.update_schema(wb.schema).then(function(){
+                            wb.run();
+                        });
+                    // If open is successful, just get and run commands
+                    }).then(function(){
                         wb.run();
-                    });
-                // If open is successful, just get and run commands
-                }).then(function(){
-                    wb.run();
+                    })
                 })
             })
         })
     });
-
 }

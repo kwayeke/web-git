@@ -19,7 +19,7 @@ The database, which is an indexedDB, is "talked to" via the URL that is called t
 
       http://vsoch.github.io/web-git?database=hello
 
-would be passing the variable `database` to the page with value `hello`. We can also specify multiple variables by way of the `&` symbol:
+would be passing the variable `database` to the page with value `hello` (the name of the database). We can also specify multiple variables by way of the `&` symbol:
 
       http://vsoch.github.io/web-git?database=hello&version=2
 
@@ -40,6 +40,9 @@ This specifies the database version, which must be an integer. To override, you 
       http://vsoch.github.io/web-git?version=2
 
 The default version number is defined in the `version` variable under the field "default" and it is the value 1.
+
+## commands
+All other commands, meaning variables in the URL, will be run in the sequence provided. For example, if you do an `add` and then a `delete` operation for the same entry, it will be added and deleted. If you do `delete` and then `add` you are going to trigger an error.
 
 # Database Schema
 The default schema used for the initially created database is defined in [js/schema.js](js/schema.js), and it's a simple list of tables, each of which has a name and fields:
