@@ -77,9 +77,15 @@ function webGit(url,specfile,schemafile) {
         var schema = schema || this.schema;
         console.log("UPDATING SCHEMA:");
         console.log(schema);
-        this.db.version(this.params.version).stores({
-            friends: 'name,shoeSize'
+
+        // Create datastructure from schema
+        var tables = {};
+        schema.tables.forEach(function(table){
+            tables[table.name] = table.fields
         });
+
+        // Update the schema
+        this.db.version(this.params.version).stores(tables);
     }
 
     // FILE OPERATIONS ///////////////////////////////////////////
