@@ -1,8 +1,8 @@
 {
   "tables": [
     {
-      "name": "friends",
-      "fields": "name,shoeSize"
+      "name": "people",
+      "fields": "name,age,shoeSize"
     }
   ]
 }

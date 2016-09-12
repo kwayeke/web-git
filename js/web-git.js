@@ -157,6 +157,17 @@ function webGit(url,specfile,schemafile) {
         this.db = new Dexie(this.params.database)
         return Promise.resolve(this.db);
     };
+
+    // Delete a database
+    this.delete = function() {
+        console.log("Deleting database " + this.db.name);
+        this.db.delete().then(function(){
+            return Promise.resolve();
+        }).catch(function(e){
+            return Promise.reject(e);
+        })
+    };
+
     
     // PRINT / VERBOSE FUNCTIONS /////////////////////////////////
     this.print = function(db,printTables) {
