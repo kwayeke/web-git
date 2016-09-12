@@ -44,6 +44,7 @@ The default version number is defined in the `version` variable under the field 
 ## commands
 All other commands, meaning variables in the URL, will be run in the sequence provided. For example, if you do an `add` and then a `delete` operation for the same entry, it will be added and deleted. If you do `delete` and then `add` you are going to trigger an error.
 
+
 # Database Schema
 The default schema used for the initially created database is defined in [js/schema.js](js/schema.js), and it's a simple list of tables, each of which has a name and fields:
 
@@ -61,4 +62,41 @@ Right now, specifying a string for the fields, and the name of the table is what
 
 # Command examples
 
-Remember that you can specify
+The default commands are those that you would expect with a database, adding, deleting, and customizing the structure of your tables.
+
+## database
+You can specify the database name to use with the `database` parameter. For example, here we are opening a database called "hello":
+
+      http://vsoch.github.io/web-git?database=hello
+
+
+## version
+You can have multiple verisons of the same database. For details, read about versioning [here](). While this function seems more fit for applications that need to support changing a database after an application is deployed (and not wanting to destroy "version 1.0 user data) there are definitely use cases for it here. Please post an issue or contact @vsoch if you have good examples. To specify the version, use the version url parameter:
+
+      http://vsoch.github.io/web-git?version=1
+
+
+Note that the version must be an integer. If you pass a string, it will turn into NaN when parsed into an int, and not be used to set the variable.
+
+## drop
+The drop parameter will delete the database, and you don't need to specify a second argument, although if you do, it will just be ignored. Here we will create and drop a database called "meatballs".
+
+      http://vsoch.github.io/web-git?database=meatballs&drop
+
+
+## stores
+A database "store" is another name for a table. The default stores (tables) are determined from schema.json, but you can also set this information via the URL. The basic format looks like `table|field1,field2,field3` where `table` is the name of the table, and the field names follow the guidlines defined [here](). To specify more than one store, you can string them together with double `||`:
+
+      tableA|fieldA1,fieldA2,fieldA3||tableB|fieldB1,fieldB2,fieldB3
+
+This was my simple solution to parsing table and field names from a URL - if you have suggestions for an improvement please contribute! Thus, to specify tables (stores) it would look something like this:
+
+      http://vsoch.github.io/web-git?stores=sandwiches|bread,filling,spread||cookies|base,flavor,mixins
+
+
+## add
+**in progress**
+A database "store" is another name for a table. The default stores (tables) are determined from schema.json, but you can also set this information via the URL. The basic format looks like `table|field1:value1,field2:value2,field3:value2` where `table` is the name of the table, and each field:value pair is separated by a comma. If a field is not found
+
+["add","delete","update","drop","stores"]
+

@@ -21,6 +21,10 @@ function webGit(url,specfile,schemafile) {
     this.specfile = specfile || "spec.json";
     this.schemafile = schemafile || "schema.json";
 
+    // State variables
+    this.rundone = false;
+    this.schemadone = false
+
     // Timestamp setter, seconds
     this.now = function() {
         return Math.floor(Date.now() / 1000)
@@ -63,14 +67,16 @@ function webGit(url,specfile,schemafile) {
         var url = url || this.schemafile;
         console.log(url);
         var holder = this;
-        return this.load_url(url).then(function(schema){
-            console.log("SCHEMA LOADED:")
-            holder.schema = schema;
-            console.log(schema);
 
-            // Set each of the defaults
-            return Promise.resolve();
-        })
+        if (holder.schemadone == false) {
+            return this.load_url(url).then(function(schema){
+                holder.schema = schema;
+                return Promise.resolve();
+            })
+        } 
+        // schema already loaded!
+        return Promise.resolve();      
+
     }
 
     this.update_schema = function(schema) {
@@ -138,24 +144,51 @@ function webGit(url,specfile,schemafile) {
             queries = parser.search.replace(/^\?/, '').split('&');
             for (i = 0; i < queries.length; i++ ) {
                 split = queries[i].split('=');
-
+                var key = split[0].replace('/','');
+                    
                 // If the parameter isn't given with an arg (eg, drop)
-                if (split.length == 0) {
-                    params[split[0]] = "";
+                if (split.length == 1) {
+                    params[key] = "";
                 } else {
-                    params[split[0]] = split[1].replace('/',''); // removes trailing slashes
-                }
+                    
+                    // removes trailing slashes
+                    var value = split[1].replace('/','');
 
-                // If the user specifies the database, set it
-                if (split[0] == "database"){
-                    console.log("Found database params...");
-                    wb.params.database = split[1].replace('/','');
-                }
+                    params[key] = value;
+
+                    // If the user specifies the database, set it
+                    if (key == "database"){
+                        console.log("Found database params...");
+                        wb.params.database = value;
+                    }
  
-                // If the user specifies the version, set it
-                if (split[0] == "version"){
-                    console.log("Found version params...");
-                    wb.params.version = split[1].replace('/','');
+                    // If the user specifies the version, set it
+                    if (key == "version"){
+                        var version = parseInt(value);
+                        if (Number.isInteger(version)){
+                            console.log("Found version params...");
+                            wb.params.version = version;
+                        }
+                    }
+
+                   // If the user specifies stores, create the schema
+                    if (key == "stores"){
+                        var stores = value.split('||');
+                        var tables = [];
+                        stores.forEach(function(table){
+                            console.log(table);
+                            tfields = table.split('|');
+                            if (tfields.length == 2){
+                                var entry = {"name":tfields[0],
+                                             "fields":tfields[1]}
+                                tables.push(entry);                          
+                            }
+                        });
+
+                        // Update the schema
+                        wb.schema = {"tables":tables};
+                        wb.schemadone = true;
+                    }
                 }
 
             }
@@ -212,16 +245,15 @@ function webGit(url,specfile,schemafile) {
                 if (this.params.command.indexOf(command) > -1){
                     var param = commands[command];
 
-                    // TODO: If valid command, take appropriate action here
-                    console.log(command + ": " + param);
+                    // If valid command, take appropriate action here
                     if (command=="drop"){
                         console.log('DROPPING DATABASE.');
                         wb.delete();
                     }
-
                 }
             }
         }
+        this.rundone = true;
     }
     
     // PRINT / VERBOSE FUNCTIONS /////////////////////////////////
@@ -248,8 +280,8 @@ function webGit(url,specfile,schemafile) {
 
     // Parse the url, load the spec, create the database
     wb = this;
-    // TODO: make the parseURL into a function, and it needs to run AFTER
-    // load_spec so parameters parsed from URL override the ones that are default in spec.
+
+    // load_spec,updated with URL params, load schema, and then run commands
     this.load_spec().then(function(){
         wb.parseURL(wb.url).then(function(){ 
             wb.create().then(function() {
@@ -263,7 +295,9 @@ function webGit(url,specfile,schemafile) {
                         });
                     // If open is successful, just get and run commands
                     }).then(function(){
-                        wb.run();
+                        if (wb.rundone == false){
+                            wb.run();
+                        }
                     })
                 })
             })
