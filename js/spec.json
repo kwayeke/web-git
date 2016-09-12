@@ -8,7 +8,8 @@
       "default":1
    },
    "command":{
-      "description":"the command to issue to the database."
+      "description":"the command to issue to the database.",
+      "default":["add","delete","update"]
    }
 
 }

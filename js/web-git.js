@@ -135,7 +135,7 @@ function webGit(url,specfile,schemafile) {
         queries = parser.search.replace(/^\?/, '').split('&');
         for (i = 0; i < queries.length; i++ ) {
             split = queries[i].split('=');
-            params[split[0]] = split[1];
+            params[split[0]] = split[1].replace('/',''); // removes trailing slashes
         }
 
        return {
@@ -169,6 +169,24 @@ function webGit(url,specfile,schemafile) {
         })
     };
 
+    // Main controller for executing commands
+    this.run = function() {
+        console.log("USER PROVIDED COMMANDS:");
+        var commands = this.parsed.params;
+        console.log(commands);
+
+        // For each command, if it's in allowable commands, run it
+        for (command in commands) {
+            if (commands.hasOwnProperty(command)){
+                if (this.params.command.indexOf(command) > -1){
+                    var param = commands[command];
+                    // TODO: If valid command, take appropriate action here
+                    console.log(command + ": " + param);
+
+                }
+            }
+        }
+    }
     
     // PRINT / VERBOSE FUNCTIONS /////////////////////////////////
     this.print = function(db,printTables) {
@@ -198,18 +216,16 @@ function webGit(url,specfile,schemafile) {
     this.load_spec().then(function(){ 
         wb.create().then(function() {
             wb.load_schema().then(function(){
-                // TODO: the following commands should be determined based on
-                // what is specified in URL - shouldn't update every time.
-                wb.print(wb.db).catch(function(e){
+                // Try opening, if there is error, update the schema
+                wb.db.open().catch(function(e){
                     console.log("Creating initial database schema...");
                     // If database not found, create it
                     wb.update_schema(wb.schema).then(function(){
-                        console.log("USER PROVIDED COMMANDS:")
-                        console.log(wb.parsed.params)
+                        wb.run();
                     });
+                // If open is successful, just get and run commands
                 }).then(function(){
-                    console.log("USER PROVIDED COMMANDS:")
-                    console.log(wb.parsed.params)
+                    wb.run();
                 })
             })
         })
