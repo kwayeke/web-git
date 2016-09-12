@@ -66,7 +66,6 @@ function webGit(url,specfile,schemafile) {
     this.load_schema = function(url) {
 
         var url = url || this.schemafile;
-        console.log(url);
         var holder = this;
 
         if (holder.schemadone == false) {
@@ -186,10 +185,8 @@ function webGit(url,specfile,schemafile) {
                         wb.schemadone = true;
                     
                     // All additional variables get added to params, to be parsed into queries
-                    } else {
-  
+                    } else { 
                         params[key] = value;
-
                     }
 
                 }
@@ -247,7 +244,6 @@ function webGit(url,specfile,schemafile) {
 
                         // If valid command, take appropriate action here
                         if (command=="drop"){
-                            console.log('DROPPING DATABASE.');
                             wb.delete();
                         }
 
@@ -266,6 +262,17 @@ function webGit(url,specfile,schemafile) {
 
         }).then(function(){
             wb.rundone = true;
+
+            // Run queries
+            wb.queries.forEach(function(query){
+                for (command in query) {
+                    if (command == "add"){
+                        // TODO: split the query, check if table in database, add fields that are defined for table
+                        console.log(query[command])
+                    }
+                }
+            });
+
             return Promise.resolve();
         })
     }
@@ -302,7 +309,6 @@ function webGit(url,specfile,schemafile) {
                 wb.load_schema().then(function(){
                     // Try opening, if there is error, update the schema
                     wb.db.open().catch(function(e){
-                        console.log("Creating initial database schema...");
                         // If database not found, create it
                         wb.update_schema(wb.schema)
                     // If open is successful, just get and run commands
