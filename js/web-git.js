@@ -14,11 +14,12 @@
 // 5. add interactive elements to view databases, select / change active database, delete database
 // 6. how can we add version control? can we integrate github?
 
-function webGit(url,specfile) {
+function webGit(url,specfile,schemafile) {
 
     // webGit init should take the url... if not defined, used document.URL
     this.url = url || document.URL;
     this.specfile = specfile || "spec.json";
+    this.schemafile = schemafile || "schema.json";
 
     // Timestamp setter, seconds
     this.now = function() {
@@ -54,6 +55,31 @@ function webGit(url,specfile) {
             return Promise.resolve()
         })
         
+    }
+
+    // Load an initial database schema
+    this.load_schema = function(url) {
+
+        var url = url || this.schemafile;
+        console.log(url);
+        var holder = this;
+        return this.load_url(url).then(function(schema){
+            console.log("SCHEMA LOADED:")
+            holder.schema = schema;
+            console.log(schema);
+
+            // Set each of the defaults
+            return Promise.resolve()
+        })
+    }
+
+    this.update_schema = function(schema) {
+        var schema = schema || this.schema;
+        console.log("UPDATING SCHEMA:");
+        console.log(schema);
+        this.db.version(this.params.version).stores({
+            friends: 'name,shoeSize'
+        });
     }
 
     // FILE OPERATIONS ///////////////////////////////////////////
@@ -122,17 +148,45 @@ function webGit(url,specfile) {
     this.create = function(params) {
         this.params = params || this.params;
         console.log("Creating database " + this.params.database);
-        this.db = new Dexie(this.params.database);
-        return Promise.resolve();
+        this.db = new Dexie(this.params.database)
+        return Promise.resolve(this.db);
     };
     
+    // PRINT / VERBOSE FUNCTIONS /////////////////////////////////
+    this.print = function(db,printTables) {
+        db = db || this.db
+        printTables = printTables || false;
+        return db.open().then(function (db) {
+            console.log ("Found database: " + db.name);
+            console.log ("Database version: " + db.verno);
+            db.tables.forEach(function (table) {
+                console.log ("Found table: " + table.name);
+                if (printTables == true) {
+                    console.log ("Table Schema: " + JSON.stringify(table.schema, null, 4));
+                }
+            });
+        }).catch('NoSuchDatabaseError', function(e) {
+            return Promise.reject(e) 
+        }).catch(function (e) {
+            return Promise.reject(e)
+        })
+    }
+
     // STARTUP COMMANDS //////////////////////////////////////////
 
     // Parse the url, load the spec, create the database
     wb = this;
     this.parsed = this.parseURL(this.url);
     this.load_spec().then(function(){ 
-        wb.create();
+        wb.create().then(function() {
+            wb.load_schema().then(function(){
+                wb.print(wb.db).catch(function(e){
+                    console.log("Creating initial database schema...");
+                    // If database not found, create it
+                    wb.update_schema();
+                })
+            })
+        })
     });
 
 }
