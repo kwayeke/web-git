@@ -273,6 +273,9 @@ function webGit(url,specfile,schemafile) {
                 }
             });
 
+            console.log("DATABASE:");
+            console.log(wb.db);
+
             return Promise.resolve();
         })
     }

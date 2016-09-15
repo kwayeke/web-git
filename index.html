@@ -1,11 +1,37 @@
-<!doctype html>
-<html>
-    <head>
-        <!-- Include Dexie and web-git -->
-        <script src="https://npmcdn.com/dexie@latest/dist/dexie.js"></script>
-        <script src="js/web-git.js"></script>
-    </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <meta charset="utf-8">
+      <title>Web-Git Basic</title>
+      <meta name="description" content="">
+      <meta name="author" content="">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+      <link rel="stylesheet" href="css/normalize.css">
+      <link rel="stylesheet" href="css/skeleton.css">
+      
+      <!-- Include Dexie and web-git -->
+      <script src="https://npmcdn.com/dexie@latest/dist/dexie.js"></script>
+      <script src="js/web-git.js"></script>
+
+</head>
+<body>
     <body>
+        <div class="container">
+            <div class="row">
+                <div class="one-half column" style="margin-top: 25%">
+                    <h4>Web-Git Basic</h4>
+                        <p>This demonstrates the basic functionality of <a href="http://www.github.com/vsoch/web-git">Web-git</a>. The database is controlled via calls to the URL (called a RESTful API), and stored locally. First, <a href="https://developers.google.com/web/tools/chrome-devtools/iterate/inspect-styles/shortcuts?hl=en" target="_blank">open up your console</a> to see the output from the database. Then try examples to the right to watch how the URL changes the database.</p>
+                </div>
+                <div class="one-half column" style="margin-top: 25%">
+                    <a href="?drop"><button class="button">Drop Database</button></a><br>
+                    <a href="?database=cat"><button class="button">Create Database Cat</button></a><br>
+                    <a href="?version=2"><button class="button">Specify Version 2</button></a><br>
+                    <a href="?stores=sandwiches|bread,filling,spread|cookies|base,flavor,mixins"><button class="button">Create Tables</button></a>
+                </div>
+            </div>
+            </div>
+
         <script>
         //(function() {
             var wb = new webGit();
