@@ -9,7 +9,7 @@
    },
    "command":{
       "description":"the command to issue to the database.",
-      "default":["add","delete","update","drop","stores"]
+      "default":["add","delete","update","drop","dropall","stores","show"]
    }
 
 }

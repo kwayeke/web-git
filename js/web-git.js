@@ -229,6 +229,26 @@ function webGit(url,specfile,schemafile) {
         })
     };
 
+    // Delete all databases
+    this.deleteAll = function(cb) {
+        Dexie.getDatabaseNames(function (names, cb) {
+            console.log('database names: ', names);
+            names.forEach(function (name) {
+                var db = new Dexie(name);
+                db.delete().then(function() {
+                    console.log('Database successfully deleted: ', name);
+                }).catch(function (err) {
+                    console.error('Could not delete database: ', name, err);
+                }).finally(function() {
+                    console.log('Done. Now executing callback if passed.');
+                if (typeof cb === 'function') {
+                    cb();
+                 }
+            });
+          });
+        });
+    }
+
     // Main controller for executing commands
     this.run = function() {
 
@@ -245,6 +265,14 @@ function webGit(url,specfile,schemafile) {
                         // If valid command, take appropriate action here
                         if (command=="drop"){
                             wb.delete();
+                        }
+
+                        if (command=="dropall"){
+                            wb.deleteAll();
+                        }
+
+                        if (command=="show"){
+                            wb.print(wb.db,true);
                         }
 
                         // If the user specifies add, add an entry to queries
@@ -266,9 +294,47 @@ function webGit(url,specfile,schemafile) {
             // Run queries
             wb.queries.forEach(function(query){
                 for (command in query) {
+
+                    // ADD RECORD
                     if (command == "add"){
-                        // TODO: split the query, check if table in database, add fields that are defined for table
-                        console.log(query[command])
+
+                        var queries = query[command].split('||')
+                        queries.forEach(function(q){
+                            table = q.split('|');
+                            if (table.length == 2){
+
+                                // if the table is in the database
+                                if (table[0] in wb.db) {
+                                    var fields = table[1].split(',');
+                                    var additions = {}
+                                    fields.forEach(function(field){
+                                        var keyvals = field.split(':');
+
+                                        // Make sure the user didn't forget the value!
+                                        if (keyvals.length > 1){
+                                            // If the field is in the table
+                                            if (keyvals[0] in wb.db[table[0]].schema.idxByName){
+                                                additions[keyvals[0]] = keyvals[1]
+                                            }
+                                        }
+                                    })
+
+                                    // If we have additions, add them!
+                                    if (additions.length > 0) {
+                                       // stopped here - need to debug this
+                                       console.log('hello!')
+                                        wb.db.open().then(function(){
+                                            console.log('hello!')
+                                            return wb.db[table[0]].add(additions);
+                                        }).then(function(){
+                                            return wb.db[table[0]].toArray();
+                                        }).then(function(results){
+                                            console.log("Found friends: " + JSON.stringify(results, null, 2));
+                                        })
+                                    }
+                                }
+                            }
+                        });
                     }
                 }
             });
@@ -281,6 +347,7 @@ function webGit(url,specfile,schemafile) {
     }
     
     // PRINT / VERBOSE FUNCTIONS /////////////////////////////////
+
     this.print = function(db,printTables) {
         db = db || this.db
         printTables = printTables || false;
